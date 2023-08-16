@@ -1,0 +1,62 @@
+.priority-text {
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+  }
+  
+  .flash-red {
+    animation-name: flash-red-animation;
+  }
+  
+  .flash-yellow {
+    animation-name: flash-yellow-animation;
+  }
+  
+  .flash-green {
+    animation-name: flash-green-animation;
+  }
+  
+  @keyframes flash-red-animation {
+    0% {
+      background-color: red;
+      color: white;
+    }
+    50% {
+      background-color: white;
+      color: black;
+    }
+    100% {
+      background-color: red;
+      color: white;
+    }
+  }
+  
+  @keyframes flash-yellow-animation {
+    0% {
+      background-color: yellow;
+      color: black;
+    }
+    50% {
+      background-color: white;
+      color: black;
+    }
+    100% {
+      background-color: yellow;
+      color: black;
+    }
+  }
+  
+  @keyframes flash-green-animation {
+    0% {
+      background-color: limegreen;
+      color: white;
+    }
+    50% {
+      background-color: white;
+      color: black;
+    }
+    100% {
+      background-color: limegreen;
+      color: white;
+    }
+  }
+  
