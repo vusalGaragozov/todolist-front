@@ -3,6 +3,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import { Line } from 'react-chartjs-2';
 import 'chart.js';
+import 'chart.js/auto';
 import 'react-datepicker/dist/react-datepicker.css';
 import { AuthContext } from './AuthContext.js';
 import { API_URL } from '../config.js';
