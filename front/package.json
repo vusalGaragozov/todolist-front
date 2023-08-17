@@ -9,12 +9,14 @@
     "aws-sdk": "^2.1422.0",
     "axios": "^1.4.0",
     "bootstrap": "^5.3.1",
+    "chart.js": "^4.3.3",
     "mock-aws-s3": "^4.0.2",
     "os-browserify": "^0.3.0",
     "path": "^0.12.7",
     "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-app-rewired": "^2.2.1",
+    "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^4.16.0",
     "react-dom": "^18.2.0",
     "react-onclickoutside": "^6.13.0",
@@ -48,7 +50,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://vusalgaragozov-8206d1f48b5f.herokuapp.com",
+  "proxy": "http://localhost:3000",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.16.0",
     "@craco/craco": "^5.9.0"

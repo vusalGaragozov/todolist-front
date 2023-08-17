@@ -32,7 +32,7 @@ const Login = () => {
       setPassword('');
       navigate('/');
     } catch (error) {
-      setError('Error logging in: ' + error.message);
+      setError('Wrong password');
     }
   };
 
