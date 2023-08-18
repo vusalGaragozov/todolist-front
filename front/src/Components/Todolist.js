@@ -7,10 +7,15 @@ import 'chart.js/auto';
 import 'react-datepicker/dist/react-datepicker.css';
 import { AuthContext } from './AuthContext.js';
 import { API_URL } from '../config.js';
+import EditModal from './EditModal';
+
+
 
 const TodoList = () => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTask, setEditTask] = useState(null);
   const [shortDescription, setShortDescription] = useState('');
   const [longDescription, setLongDescription] = useState('');
   const [deadline, setDeadline] = useState(null);
@@ -21,12 +26,12 @@ const TodoList = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const taskCounts = tasks.reduce((counts, task) => {
-    const month = new Date(task.deadline).getMonth();
+    const dateParts = task.deadline.split('-'); // Split date string by hyphens
+    const month = parseInt(dateParts[1], 10); // Extract the month part
     counts[month] = (counts[month] || 0) + 1;
     return counts;
   }, Array(12).fill(0));
 
-  // Chart data
   const chartData = {
     labels: [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -43,11 +48,10 @@ const TodoList = () => {
     ]
   };
 
-  // Chart options
   const chartOptions = {
     scales: {
       x: {
-        type: 'category', // Use 'category' scale type for X-axis
+        type: 'category',
         grid: {
           display: false
         }
@@ -116,12 +120,19 @@ const TodoList = () => {
   };
 
   const formatDate = (date) => {
-    const options = { day: '2-digit', month: 'short', year: '2-digit' };
-    const formattedDate = new Date(date).toLocaleDateString('en-GB', options);
-    const parts = formattedDate.split(' ');
-    return `${parts[0]} ${parts[1]} ${parts[2]}`;
+    if (!date || isNaN(new Date(date))) {
+      return '';
+    }
+    
+    const parsedDate = new Date(date);
+    const year = parsedDate.getFullYear();
+    const month = parsedDate.toLocaleString('default', { month: 'short' });
+    const day = parsedDate.getDate();
+    
+    return `${year}-${month}-${day}`;
   };
-
+  
+  
   const handleDeleteTask = async (id) => {
     try {
       await axios.delete(`${API_URL}/tasks/${id}`, {
@@ -137,11 +148,46 @@ const TodoList = () => {
     }
   };
 
+  const handleEditTask = (task) => {
+    console.log("Original Task Deadline:", task.deadline);
+    setIsEditing(true);
+    setEditTask(task);
+    setShortDescription(task.shortDescription);
+    setLongDescription(task.longDescription);
+    if (task.deadline) {
+      try {
+        const convertedDeadline = new Date(task.deadline);
+        setDeadline(convertedDeadline); // Convert the deadline to a Date object
+        console.log("Converted Deadline:", convertedDeadline);
+        setPriority(task.priority);
+        setAssignedBy(task.assignedBy);
+      } catch (error) {
+        console.error("Error parsing deadline:", error);
+        setDeadline(null);
+      }
+    }
+  };
+  
+
+  const updateTask = async (updatedTask) => {
+    try {
+      await axios.put(`${API_URL}/tasks/${updatedTask._id}`, updatedTask, {
+        withCredentials: true,
+      });
+
+      const response = await axios.get(`${API_URL}/tasks`, {
+        withCredentials: true,
+      });
+      setTasks(response.data);
+    } catch (error) {
+      setError('Error updating task: ' + error.message);
+    }
+  };
+
   const filterTasks = (filter) => {
     setActiveFilter(filter);
   };
-
-  return (
+     return (
     <div className="container">
       <h2 className="mt-4">Todo List</h2>
 
@@ -199,9 +245,10 @@ const TodoList = () => {
                         </label>
                       </div>
                       <div className="col-md-8">
+                      
                         <DatePicker
-                          selected={deadline}
-                          onChange={(date) => setDeadline(date)}
+                          selected={deadline ? (deadline) : null}
+                          onChange={(date) => setDeadline((date))}
                           className="form-control"
                         />
                       </div>
@@ -340,6 +387,12 @@ const TodoList = () => {
                       <td>{task.assignedBy}</td>
                       <td>
                         <button
+                          onClick={() => handleEditTask(task)}
+                          className="btn btn-secondary"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDeleteTask(task._id)}
                           className="btn btn-danger"
                         >
@@ -352,6 +405,17 @@ const TodoList = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {isEditing && (
+        <EditModal
+          task={editTask}
+          updateTask={updateTask}
+          closeModal={() => {
+            setIsEditing(false);
+            setEditTask(null);
+          }}
+        />
       )}
     </div>
   );
