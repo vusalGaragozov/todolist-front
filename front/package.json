@@ -10,7 +10,6 @@
     "axios": "^1.4.0",
     "bootstrap": "^5.3.1",
     "chart.js": "^4.3.3",
-    "date-fns": "^2.30.0",
     "mock-aws-s3": "^4.0.2",
     "os-browserify": "^0.3.0",
     "path": "^0.12.7",
