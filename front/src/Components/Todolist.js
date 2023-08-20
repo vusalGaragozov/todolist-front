@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import DatePicker from 'react-datepicker';
 import { Line } from 'react-chartjs-2';
 import 'chart.js';
 import 'chart.js/auto';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { AuthContext } from './AuthContext.js';
 import { API_URL } from '../config.js';
+import EditTaskModal from './EditTaskModal.js'; // Make sure to provide the correct path
 
 const TodoList = () => {
   const { user } = useContext(AuthContext);
@@ -19,6 +20,7 @@ const TodoList = () => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
   const taskCounts = tasks.reduce((counts, task) => {
     const dateParts = task.deadline.split('-');
@@ -69,7 +71,6 @@ const TodoList = () => {
         } else {
           setIsAuthenticated(true);
           setTasks(response.data);
-          console.log(response.data)
         }
       } catch (error) {
         setError('Error fetching tasks: ' + error.message);
@@ -142,10 +143,22 @@ const TodoList = () => {
     }
   };
 
-
-
   const filterTasks = (filter) => {
     setActiveFilter(filter);
+  };
+
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTask(null);
+  };
+
+  const handleUpdateTask = (updatedTask) => {
+    const updatedTasks = tasks.map((task) => (task._id === updatedTask._id ? updatedTask : task));
+    setTasks(updatedTasks);
+    setEditingTask(null);
   };
 
   return (
@@ -206,7 +219,6 @@ const TodoList = () => {
                         </label>
                       </div>
                       <div className="col-md-8">
-                      
                         <DatePicker
                           selected={deadline}
                           onChange={(date) => setDeadline(date)}
@@ -323,16 +335,16 @@ const TodoList = () => {
       {isAuthenticated && (
         <div className="row">
           <div className="col-md-12">
-            <table className="table table-striped">
+            <table className="table table-striped table-bordered">
               <thead>
                 <tr>
-                  <th style={{ width: '5%' }}>#</th>
-                  <th style={{ width: '15%' }}>Short Description</th>
-                  <th style={{ width: '35%' }}>Long Description</th>
-                  <th style={{ width: '10%' }}>Deadline</th>
-                  <th style={{ width: '10%' }}>Priority</th>
-                  <th style={{ width: '15%' }}>Assigned to</th>
-                  <th style={{ width: '10%' }}>Action</th>
+                  <th style={{ width: '5%' }} className="text-center">#</th>
+                  <th style={{ width: '15%' }} className="text-center">Short Description</th>
+                  <th style={{ width: '25%' }} className="text-center">Long Description</th>
+                  <th style={{ width: '15%' }} className="text-center">Deadline</th>
+                  <th style={{ width: '10%' }} className="text-center">Priority</th>
+                  <th style={{ width: '15%' }} className="text-center">Assigned to</th>
+                  <th style={{ width: '15%' }} className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -340,17 +352,22 @@ const TodoList = () => {
                   .filter((task) => (activeFilter ? task.priority === activeFilter : true))
                   .map((task, index) => (
                     <tr key={task._id}>
-                      <td>{index + 1}</td>
-                      <td>{task.shortDescription}</td>
-                      <td>{task.longDescription}</td>
-                      <td>{formatDate(task.deadline)}</td>
-                      <td>{task.priority}</td>
-                      <td>{task.assignedBy}</td>
-                      <td>
-                      
+                      <td className="text-center">{index + 1}</td>
+                      <td className="text-center">{task.shortDescription}</td>
+                      <td className="text-center">{task.longDescription}</td>
+                      <td className="text-center"> {formatDate(task.deadline)}</td>
+                      <td className="text-center">{task.priority}</td>
+                      <td className="text-center">{task.assignedBy}</td>
+                      <td className="text-center">
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className="btn btn-success me-2 btn-sm"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => handleDeleteTask(task._id)}
-                          className="btn btn-danger"
+                          className="btn btn-danger btn-sm"
                         >
                           Delete
                         </button>
@@ -361,9 +378,13 @@ const TodoList = () => {
             </table>
           </div>
         </div>
+      )} {editingTask && (
+        <EditTaskModal
+          task={editingTask}
+          onUpdate={handleUpdateTask}
+          onCancel={handleCancelEdit}
+        />
       )}
-
-      
     </div>
   );
 };
