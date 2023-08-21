@@ -13,6 +13,20 @@
   }
 }
 
+/* styles.css */
+.larger-modal-dialog {
+  max-width: 25%; /* Adjust the max-width value as needed */
+}
+
+.edit-button {
+  background-color: #0d6efd;
+  color: white; /* Set text color to ensure readability */
+}
+
+.edit-button:hover {
+  background-color: #1c82ff; /* Brighter version for hover state */
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import 'chart.js';
 import 'chart.js/auto';
+import '../App.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { AuthContext } from './AuthContext.js';
@@ -39,7 +40,7 @@ const TodoList = () => {
         label: 'Number of Tasks',
         data: taskCounts,
         fill: false,
-        borderColor: 'rgb(75, 192, 192)',
+        borderColor: '#0d6efd',
         tension: 0.1
       }
     ]
@@ -54,10 +55,19 @@ const TodoList = () => {
         }
       },
       y: {
-        beginAtZero: true
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: true // Set this to false to hide the legend
       }
     }
   };
+  
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -117,16 +127,19 @@ const TodoList = () => {
   };
 
   const formatDate = (date) => {
-    if (!date || isNaN(new Date(date))) {
+    if (!date || isNaN(date)) {
       return '';
     }
-    
-    const parsedDate = new Date(date);
-    const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
-    const formattedDate = parsedDate.toLocaleDateString(undefined, options);
   
-    return formattedDate;
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    };
+  
+    return date.toLocaleString(undefined, options);
   };
+  
 
   const handleDeleteTask = async (id) => {
     try {
@@ -157,10 +170,15 @@ const TodoList = () => {
 
   const handleUpdateTask = async (updatedTask) => {
     try {
-      updatedTask.deadline = updatedTask.deadline.toISOString();
+      if (updatedTask.deadline instanceof Date) {
+        // Convert to UTC before sending to server
+        updatedTask.deadline = updatedTask.deadline.toISOString();
+      }
+  
       const response = await axios.put(`${API_URL}/tasks/${updatedTask._id}`, updatedTask, {
         withCredentials: true,
       });
+  
       const updatedTasks = tasks.map((task) =>
         task._id === response.data._id ? response.data : task
       );
@@ -168,7 +186,7 @@ const TodoList = () => {
       console.log(updatedTasks);
       setEditingTask(null);
     } catch (error) {
-      // Handle error
+      console.log(error);
     }
   };
   
@@ -367,13 +385,14 @@ const TodoList = () => {
                       <td className="text-center">{index + 1}</td>
                       <td className="text-center">{task.shortDescription}</td>
                       <td className="text-center">{task.longDescription}</td>
-                      <td className="text-center"> {formatDate(task.deadline)}</td>
+                      <td className="text-center"> {formatDate(new Date(task.deadline))}</td>
                       <td className="text-center">{task.priority}</td>
                       <td className="text-center">{task.assignedBy}</td>
                       <td className="text-center">
                         <button
                           onClick={() => handleEditTask(task)}
-                          className="btn btn-success me-2 btn-sm"
+                          className="btn btn-success me-2 btn-sm edit-button"
+                        
                         >
                           Edit
                         </button>

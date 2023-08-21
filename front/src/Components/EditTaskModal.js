@@ -5,6 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css'; // Import DatePicker styles
 import axios from 'axios';
 import {parseISO} from 'date-fns';
 import { API_URL } from '../config.js';
+import '../App.css';
 
 const EditTaskModal = ({ task, onUpdate, onCancel }) => {
   const [editedShortDescription, setEditedShortDescription] = useState(task.shortDescription);
@@ -12,6 +13,8 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
   const [editedDeadline, setEditedDeadline] = useState(task.deadline);
   const [editedPriority, setEditedPriority] = useState(task.priority);
   const [editedAssignedBy, setEditedAssignedBy] = useState(task.assignedBy);
+
+  const parsedDeadline = typeof editedDeadline === 'string' ? parseISO(editedDeadline) : editedDeadline;
 
   const handleUpdate = async () => {
     const updatedTask = {
@@ -35,7 +38,7 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
   
 
   return (
-    <Modal show={true} onHide={onCancel}>
+    <Modal show={true} onHide={onCancel} dialogClassName="larger-modal-dialog">
       <Modal.Header closeButton>
         <Modal.Title>Edit Task</Modal.Title>
       </Modal.Header>
@@ -62,11 +65,11 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
         </div>
         <div>
           <label htmlFor="editedDeadline">Deadline:</label>
-          <DatePicker
-            selected={typeof editedDeadline === 'string' ? parseISO(editedDeadline) : editedDeadline}
+          <div><DatePicker
+            selected={parsedDeadline}
             onChange={(date) => setEditedDeadline(date)}
             className="form-control"
-          />
+          /></div>
         </div>
         <div>
           <label htmlFor="editedPriority">Priority:</label>
