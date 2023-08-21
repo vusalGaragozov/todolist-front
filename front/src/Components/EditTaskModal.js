@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import DatePicker from 'react-datepicker'; // Import DatePicker
+import 'react-datepicker/dist/react-datepicker.css'; // Import DatePicker styles
+import axios from 'axios';
+import {parseISO} from 'date-fns';
+import { API_URL } from '../config.js';
 
 const EditTaskModal = ({ task, onUpdate, onCancel }) => {
   const [editedShortDescription, setEditedShortDescription] = useState(task.shortDescription);
@@ -8,7 +13,7 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
   const [editedPriority, setEditedPriority] = useState(task.priority);
   const [editedAssignedBy, setEditedAssignedBy] = useState(task.assignedBy);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     const updatedTask = {
       ...task,
       shortDescription: editedShortDescription,
@@ -17,8 +22,17 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
       priority: editedPriority,
       assignedBy: editedAssignedBy,
     };
-    onUpdate(updatedTask);
+    try {
+      const response = await axios.put(`${API_URL}/tasks/${task._id}`, updatedTask, {
+        withCredentials: true,
+      });
+      onUpdate(response.data); // Update the parent component's state with the updated task
+      console.log(response.data);
+    } catch (error) {
+      // Handle error
+    }
   };
+  
 
   return (
     <Modal show={true} onHide={onCancel}>
@@ -48,11 +62,9 @@ const EditTaskModal = ({ task, onUpdate, onCancel }) => {
         </div>
         <div>
           <label htmlFor="editedDeadline">Deadline:</label>
-          <input
-            type="text"
-            id="editedDeadline"
-            value={editedDeadline}
-            onChange={(e) => setEditedDeadline(e.target.value)}
+          <DatePicker
+            selected={typeof editedDeadline === 'string' ? parseISO(editedDeadline) : editedDeadline}
+            onChange={(date) => setEditedDeadline(date)}
             className="form-control"
           />
         </div>

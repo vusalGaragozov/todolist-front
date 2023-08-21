@@ -155,11 +155,23 @@ const TodoList = () => {
     setEditingTask(null);
   };
 
-  const handleUpdateTask = (updatedTask) => {
-    const updatedTasks = tasks.map((task) => (task._id === updatedTask._id ? updatedTask : task));
-    setTasks(updatedTasks);
-    setEditingTask(null);
+  const handleUpdateTask = async (updatedTask) => {
+    try {
+      updatedTask.deadline = updatedTask.deadline.toISOString();
+      const response = await axios.put(`${API_URL}/tasks/${updatedTask._id}`, updatedTask, {
+        withCredentials: true,
+      });
+      const updatedTasks = tasks.map((task) =>
+        task._id === response.data._id ? response.data : task
+      );
+      setTasks(updatedTasks);
+      console.log(updatedTasks);
+      setEditingTask(null);
+    } catch (error) {
+      // Handle error
+    }
   };
+  
 
   return (
     <div className="container">
