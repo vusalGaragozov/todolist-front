@@ -24,8 +24,9 @@ const TodoList = () => {
   const [editingTask, setEditingTask] = useState(null);
 
   const taskCounts = tasks.reduce((counts, task) => {
-    const dateParts = task.deadline.split('-');
-    const month = parseInt(dateParts[1], 10);
+    const utcDeadline = new Date(task.deadline);
+    const localDeadline = new Date(utcDeadline.getTime() + utcDeadline.getTimezoneOffset() * 60000);
+    const month = localDeadline.getMonth();
     counts[month] = (counts[month] || 0) + 1;
     return counts;
   }, Array(12).fill(0));
@@ -136,8 +137,8 @@ const TodoList = () => {
       month: 'short',
       day: 'numeric',
     };
-  
-    return date.toLocaleString(undefined, options);
+    const localDate = new Date(date);
+    return localDate.toLocaleString(undefined, options);
   };
   
 
