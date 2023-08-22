@@ -23,6 +23,7 @@ function ChartOfAccounts() {
       setAccountData((prevData) => prevData.filter((account) => account._id !== accountId));
     } catch (error) {
       console.error('Error deleting account:', error);
+      console.log(error)
     }
   };
 
@@ -95,39 +96,40 @@ function ChartOfAccounts() {
             <th>Caption</th>
             <th>FS Line</th>
             <th>Currency</th>
-            <th className="no-border"></th> {/* Empty header cell for the "Delete" column */}
+            <th className="no-border"></th>
           </tr>
         </thead>
         <tbody>
-          {accountData.map((account) => (
-            <tr
-              key={account._id} // Add unique key prop
-              className="account-row"
-              onMouseEnter={() => {
-                const deleteCell = document.querySelector(`#delete-cell-${account._id}`);
-                deleteCell.style.visibility = 'visible';
-              }}
-              onMouseLeave={() => {
-                const deleteCell = document.querySelector(`#delete-cell-${account._id}`);
-                deleteCell.style.visibility = 'hidden';
-              }}
-            >
-              <td>{account.report}</td>
-              <td>{account.class}</td>
-              <td>{account.caption}</td>
-              <td>{account.fsLine}</td>
-              <td>{account.currency}</td>
-              <td
-                id={`delete-cell-${account._id}`}
-                className="delete-cell"
-                style={{ visibility: 'hidden', cursor: 'pointer' }}
-                onClick={() => handleDeleteAccount(account._id)}
-              >
-                Delete
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {accountData.map((account) => (
+    <tr
+    key={account._id} // Assign a unique key using the account's _id
+    className="account-row"
+    onMouseEnter={() => {
+      const deleteCell = document.querySelector(`#delete-cell-${account._id}`);
+      deleteCell.style.visibility = 'visible';
+    }}
+    onMouseLeave={() => {
+      const deleteCell = document.querySelector(`#delete-cell-${account._id}`);
+      deleteCell.style.visibility = 'hidden';
+      }}
+    >
+      <td>{account.report}</td>
+      <td>{account.class}</td>
+      <td>{account.caption}</td>
+      <td>{account.fsLine}</td>
+      <td>{account.currency}</td>
+      <td
+        id={`delete-cell-${account._id}`}
+        className="delete-cell"
+        style={{ visibility: 'hidden', cursor: 'pointer' }}
+        onClick={() => handleDeleteAccount(account._id)}
+      >
+        Delete
+      </td>
+    </tr>
+  ))}
+</tbody>
+
       </table>
 
       <h3>Add New Account</h3>
