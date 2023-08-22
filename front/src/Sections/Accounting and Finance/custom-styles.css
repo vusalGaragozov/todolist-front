@@ -1,0 +1,91 @@
+/* custom-styles.css */
+
+/* Custom styles for menu items */
+
+.vertical-nav {
+    background-color: white; /* Change background color of menu section */
+    padding: 20px;
+    width: 100%;
+    margin-left: -47px;
+    border-right: 1px solid #ccc
+  }
+
+  /* Custom styles for header */
+.vertical-nav h2 {
+    border-bottom: 1px solid #ccc; /* Add a grey line to the bottom of the header */
+    padding-bottom: 0px; /* Add some padding below the header */
+  }
+
+.text-center-fin.menu {
+    font-size: 24px;
+  }
+  
+  .overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  
+  .account-row:hover .delete-overlay {
+    display: block;
+  }
+
+  /* styles.css */
+.no-border {
+    border: none;
+    padding: 0;
+  }
+  
+  
+  .delete-overlay {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(0, -50%);
+    padding: 2px 8px;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+.custom-menu-item {
+    display: block;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    font-size: 16px; /* Adjust font size for menu items */
+    color: black;
+    cursor: pointer;
+  }
+  
+  .custom-menu-item:hover,
+  .active .custom-menu-item  {
+    background-color: #F0F0F0;
+    color: black;
+  }
+  
+  /* Custom styles for submenu items */
+/* custom-styles.css */
+
+.submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .submenu-item {
+    font-size: 14px; /* Adjust font size for submenu items */
+    padding: 5px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding-left: 35px; /* Increase left margin for submenu items */
+  }
+  
+  .active .submenu-item {
+    opacity: 1;
+  }
+  
+  
