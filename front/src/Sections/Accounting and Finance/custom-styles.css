@@ -61,6 +61,23 @@
     padding: 0;
     margin: 0;
   }
+  .collapsible-section {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f7f7f7;
+  }
+  
+  .collapsible-header {
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .collapsible-content {
+    margin-top: 10px;
+  }
+  
   
   .submenu-item {
     font-size: 14px; /* Adjust font size for submenu items */
