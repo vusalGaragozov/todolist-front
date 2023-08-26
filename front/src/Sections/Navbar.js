@@ -53,6 +53,14 @@ const Navbar = () => {
             </li>
           </ul>
           <ul className="navbar-nav">
+            {user && window.location.pathname !== '/login' && window.location.pathname !== '/register' && (
+              <li className="nav-item">
+                <span style={{ marginRight: '10px', color:'white'}}>Welcome, {user.username}!</span>
+                <button className="btn btn-danger" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
+            )}
             {!user && (
               <>
                 <li className="nav-item">
@@ -67,18 +75,14 @@ const Navbar = () => {
                 </li>
               </>
             )}
-            {user && window.location.pathname !== '/login' && window.location.pathname !== '/register' && (
-              <li className="nav-item">
-                <button className="btn btn-danger" onClick={handleLogout}>
-                  Logout
-                </button>
-              </li>
-            )}
           </ul>
         </div>
       </div>
     </nav>
   );
+  
+  
+  
 };
 
 export default Navbar;

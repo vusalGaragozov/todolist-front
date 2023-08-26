@@ -5,21 +5,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faPlus, faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import * as XLSX from 'xlsx';
 import { AuthContext } from '../AuthContext.js'; //
-import { Modal, Button } from 'react-bootstrap';
-
+import { Modal, Button, Form } from 'react-bootstrap';
+import { useAccountData } from './AccountDataContext'; // Import the useAccountData hook
 
 
 function ChartOfAccounts() {
   const { user } = useContext(AuthContext);
   const loggedInUserId = user._id;
-  const [accountData, setAccountData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const {accountData, setAccountData} = useAccountData();
   const [selectedFile, setSelectedFile] = useState(null);
-  const [showAddAccount, setShowAddAccount] = useState(false);
-  const [showUploadExcel, setShowUploadExcel] = useState(false);
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUploadExcelModal, setShowUploadExcelModal] = useState(false);
+  const [isFetching, setIsFetching] = useState(true); // Add the isFetching state
+  const [refreshAccounts, setRefreshAccounts] = useState(false); // Add the state here
+
+
+
+
 
   const handleAddModalToggle = () => {
     setShowAddModal(!showAddModal);
@@ -42,15 +45,25 @@ function ChartOfAccounts() {
 
   const handleDeleteSelectedAccounts = async () => {
     try {
+      // Delete selected accounts
       await Promise.all(selectedAccounts.map(async (accountId) => {
         await axios.delete(`/api/accounts/${accountId}`);
       }));
   
-      setAccountData((prevData) =>
-        prevData.filter((account) => !selectedAccounts.includes(account._id))
-      );
+      // Fetch the updated account data
+      try {
+        const response = await axios.get('/api/accounts');
+        const userAccounts = response.data.filter(account => account.userId === loggedInUserId);
+        setAccountData(userAccounts); // Update account data in context
+      } catch (error) {
+        console.error('Error fetching updated accounts:', error);
+      }
   
+      // Reset selected accounts and trigger refresh states
       setSelectedAccounts([]);
+      setRefreshAccounts(true); // Update the accounts refresh state here
+      setRefreshSalesTransaction(true); // Trigger SalesTransaction refresh
+  
     } catch (error) {
       console.error('Error deleting selected accounts:', error);
     }
@@ -92,20 +105,24 @@ function ChartOfAccounts() {
   };
   
   
+
   useEffect(() => {
-    async function fetchData() {
+    async function fetchUpdatedData() {
       try {
         const response = await axios.get('/api/accounts');
         const userAccounts = response.data.filter(account => account.userId === loggedInUserId);
         setAccountData(userAccounts);
+        setIsFetching(false); // Set fetching to false after data is fetched
+  
       } catch (error) {
         console.error('Error fetching accounts:', error);
-      } finally {
-        setIsLoading(false);
+        setIsFetching(false); // Set fetching to false even if there's an error
       }
     }
-    fetchData();
-  }, [loggedInUserId]);
+  
+    fetchUpdatedData();
+  }, [loggedInUserId, setAccountData]);
+  
 
   const handleSelectAccount = (accountId) => {
     setSelectedAccounts((prevSelectedAccounts) => {
@@ -113,23 +130,9 @@ function ChartOfAccounts() {
         return prevSelectedAccounts.filter((id) => id !== accountId);
       } else {
         return [...prevSelectedAccounts, accountId];
-      }
+      } 
     });
-  };
-  
-  
-
-  const handleDeleteAccount = async (accountId) => {
-    try {
-      await axios.delete(`/api/accounts/${accountId}`);
-      setAccountData((prevData) =>
-        prevData.filter((account) => account._id !== accountId)
-      );
-    } catch (error) {
-      console.error('Error deleting account:', error);
-    }
-  };
-  
+  }; 
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -138,6 +141,8 @@ function ChartOfAccounts() {
       [name]: value
     }));
   };
+
+  const fsLineValues = [...new Set(accountData.map(account => account.fsLine))];
 
   
   const handleAddAccount = async () => {
@@ -158,7 +163,7 @@ function ChartOfAccounts() {
         try {
           const response = await axios.get('/api/accounts');
           const userAccounts = response.data.filter(account => account.userId === loggedInUserId);
-          setAccountData(userAccounts);
+          setAccountData(userAccounts); // Update account data in context
         } catch (error) {
           console.error('Error fetching updated accounts:', error);
         }
@@ -169,14 +174,14 @@ function ChartOfAccounts() {
           caption: '',
           fsLine: '',
           currency: ''
-        }
-        
-        );
+        });
       }
     } catch (error) {
       alert('Please fill in all fields.');
     }
   };
+  
+
 
 
   return (
@@ -209,46 +214,53 @@ function ChartOfAccounts() {
         />
       </div>
       </div>
-  
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Report</th>
-              <th>Class</th>
-              <th>Caption</th>
-              <th>FS Line</th>
-              <th>Currency</th>
-              <th>Select</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accountData.map((account) => (
-              <tr
-                key={account._id}
-                className={`account-row ${
-                  selectedAccounts.includes(account._id) ? 'selected' : ''
-                }`}
-              >
-                <td>{account.report}</td>
-                <td>{account.accountClass}</td>
-                <td>{account.caption}</td>
-                <td>{account.fsLine}</td>
-                <td>{account.currency}</td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.includes(account._id)}
-                    onChange={() => handleSelectAccount(account._id)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      
+     
+      <table className="table table-bordered">
+  <thead>
+    <tr>
+      <th>Report</th>
+      <th>Class</th>
+      <th>Caption</th>
+      <th>FS Line</th>
+      <th>Currency</th>
+      <th>Select</th>
+    </tr>
+  </thead>
+  <tbody>
+    {isFetching ? ( // Use isFetching instead of isLoading
+      <tr>
+        <td colSpan="6">Loading...</td>
+      </tr>
+    ) : (
+      accountData.map((account) => (
+        <tr
+          key={account._id}
+          className={`account-row ${
+            selectedAccounts.includes(account._id) ? 'selected' : ''
+          }`}
+        >
+          <td>{account.report}</td>
+          <td>{account.accountClass}</td>
+          <td>{account.caption}</td>
+          <td>{account.fsLine}</td>
+          <td>{account.currency}</td>
+          <td className="d-flex justify-content-center align-items-center">
+            <Form.Check className="custom-checkbox">
+              <Form.Check.Input
+                type="checkbox"
+                checked={selectedAccounts.includes(account._id)}
+                onChange={() => handleSelectAccount(account._id)}
+              />
+              <Form.Check.Label className="custom-checkbox-label" />
+            </Form.Check>
+          </td>
+        </tr>
+      ))
+    )}
+  </tbody>
+</table>
+
   
       {/* Add New Account Modal */}
       <Modal show={showAddModal} onHide={handleAddModalClose}>
@@ -364,7 +376,6 @@ function ChartOfAccounts() {
           </form>
         </Modal.Body>
       </Modal>
-
     </div>
   );
 }

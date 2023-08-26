@@ -9,6 +9,7 @@ import Register from './Sections/register.js'; // Fixed the import path
 import Login from './Sections/login.js';
 import { AuthProvider } from './Sections/AuthContext.js'; // Use AuthContext instead of AuthProvider
 
+
 function App() {
   return (
     <AuthProvider>
